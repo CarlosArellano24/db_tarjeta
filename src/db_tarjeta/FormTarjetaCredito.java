@@ -9,6 +9,7 @@ import java.awt.HeadlessException;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.Connection;
+import java.sql.ResultSet;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -29,23 +30,13 @@ public class FormTarjetaCredito extends javax.swing.JFrame {
     
     Connection conectar = Conexion.MySQLConnect();
     
-    private JTable tblTabla = new JTable();
     private DefaultTableModel dtm = new DefaultTableModel();
+    DateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
     
     
     public FormTarjetaCredito() {
         initComponents();
         setLocationRelativeTo(null);
-        
-        
-        dtm.addColumn("Nombre");
-        dtm.addColumn("Vencimiento");
-        dtm.addColumn("Linea de Crédito");
-        dtm.addColumn("Número");
-        dtm.addColumn("CVV");
-        dtm.addColumn("Banco");
-        
-        tblTabla = new JTable(dtm);
         
         
         //TextPrompt placeholderNombreCliente = new TextPrompt("Escriba su nombre...", txfNombreCliente);
@@ -56,10 +47,10 @@ public class FormTarjetaCredito extends javax.swing.JFrame {
     {
         MaskFormatter formato = null;
         try {
-        formato = new MaskFormatter("####-####-####-####");
-        formato.setValidCharacters("0123456789");
-        formato.setPlaceholderCharacter('X');
-        formato.setAllowsInvalid(false);
+            formato = new MaskFormatter("####-####-####-####");
+            formato.setValidCharacters("0123456789");
+            formato.setPlaceholderCharacter('X');
+            formato.setAllowsInvalid(false);
         }
         catch(java.text.ParseException exc){
             
@@ -110,6 +101,13 @@ public class FormTarjetaCredito extends javax.swing.JFrame {
         jLabel17 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         jLabel18 = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        mnuCrear = new javax.swing.JMenuItem();
+        mnuConsultar = new javax.swing.JMenuItem();
+        mnuModificar = new javax.swing.JMenuItem();
+        mnuEliminar = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -233,12 +231,52 @@ public class FormTarjetaCredito extends javax.swing.JFrame {
 
         getContentPane().add(pnlMain, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 850, 540));
 
+        jMenu1.setText("Opciones");
+
+        mnuCrear.setText("Nueva Tarjeta");
+        mnuCrear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuCrearActionPerformed(evt);
+            }
+        });
+        jMenu1.add(mnuCrear);
+
+        mnuConsultar.setText("Consultar Tarjeta");
+        mnuConsultar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuConsultarActionPerformed(evt);
+            }
+        });
+        jMenu1.add(mnuConsultar);
+
+        mnuModificar.setText("Modificar Tarjeta");
+        mnuModificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuModificarActionPerformed(evt);
+            }
+        });
+        jMenu1.add(mnuModificar);
+
+        mnuEliminar.setText("Eliminar Tarjeta");
+        mnuEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuEliminarActionPerformed(evt);
+            }
+        });
+        jMenu1.add(mnuEliminar);
+
+        jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Salir");
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnviarActionPerformed
-        
-        DateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
+
         
         try { 
             /**** Validación de datos ****/    
@@ -274,12 +312,7 @@ public class FormTarjetaCredito extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, 
                         "Los datos fueron registrados con éxito!");
             
-                txfNombreCliente.setText("");
-                dtcFechaVencimiento.setDate(null);
-                cbxLineaCredito.setSelectedIndex(0);
-                ftfNumeroTarjeta.setText("");
-                ftfCVV.setText("");
-                cbxBanco.setSelectedIndex(0);
+                limpiarObjetos();
             }
             
             
@@ -299,7 +332,134 @@ public class FormTarjetaCredito extends javax.swing.JFrame {
     private void ftfNumeroTarjetaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ftfNumeroTarjetaActionPerformed
     }//GEN-LAST:event_ftfNumeroTarjetaActionPerformed
 
+    private void mnuModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuModificarActionPerformed
+        try {
+            String nombreCliente = txfNombreCliente.getText();
+            String fechaVencimiento  = formatoFecha.format(dtcFechaVencimiento.getDate());
+            String lineaCredito = cbxLineaCredito.getSelectedItem().toString();
+            String numeroTarjeta = ftfNumeroTarjeta.getText();
+            String CVV = ftfCVV.getText();
+            String banco = cbxBanco.getSelectedItem().toString();
+            
+            System.out.println(numeroTarjeta);
+           
+            String query = "UPDATE contactos SET nombreCliente = '" + nombreCliente 
+                    + "',fechaVencimiento = DATE'" + fechaVencimiento
+                    + "',lineaCredito = " + lineaCredito
+                    + ",CVV = '" + CVV
+                    + "',banco = '" + banco
+                    + "' WHERE numeroTarjeta ='" + numeroTarjeta + "'";
 
+            PreparedStatement ps = (PreparedStatement) conectar.prepareStatement(query);
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(null,
+                        "Los Datos Fueron ACTUALIZADOS",
+                        "My-App ", 3);
+            limpiarObjetos();
+        } catch (HeadlessException | SQLException exc) {
+            JOptionPane.showMessageDialog(null, 
+                    "ERROR al buscar dato",
+                    "Error!!!!!", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception exc) {
+            JOptionPane.showMessageDialog(null, 
+                    "ERROR No Hay Conexion a la Base de Datos",
+                    "Error!!!!!", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_mnuModificarActionPerformed
+
+    private void mnuCrearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuCrearActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_mnuCrearActionPerformed
+
+    private void mnuConsultarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuConsultarActionPerformed
+        
+        try {
+            String query = "SELECT * FROM contactos WHERE numeroTarjeta=?";
+            PreparedStatement ps = (PreparedStatement) conectar.prepareStatement(query);
+            ps.setString(1, ftfNumeroTarjeta.getText());
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                
+                String lineaCredito = rs.getString(3);
+                int indexLineaCredito = 
+                        lineaCredito.equals("1000")   ? 1 :
+                        lineaCredito.equals("3000")   ? 2 :
+                        lineaCredito.equals("5000")   ? 3 :
+                        lineaCredito.equals("10000")  ? 4 :
+                        lineaCredito.equals("20000")  ? 5 :
+                        lineaCredito.equals("100000") ? 6 : 0;
+                
+                String banco = rs.getString(6);
+                int indexBanco =
+                        banco.equals("HSBC")       ? 1 :
+                        banco.equals("Banorte")    ? 2 :
+                        banco.equals("BBVA")       ? 3 :
+                        banco.equals("Scotiabank") ? 4 :
+                        banco.equals("Banamex")    ? 5 :
+                        banco.equals("Inbursa")    ? 6 :
+                        banco.equals("IXE")        ? 7 : 0;
+                        
+                
+                txfNombreCliente.setText(         rs.getString(1));
+                dtcFechaVencimiento.setDate(      formatoFecha.parse(rs.getString(2)));
+                cbxLineaCredito.setSelectedIndex( indexLineaCredito);
+                ftfNumeroTarjeta.setText(         rs.getString(4));
+                ftfCVV.setText(                   rs.getString(5));
+                cbxBanco.setSelectedIndex(        indexBanco);
+
+            } else {
+                
+                JOptionPane.showMessageDialog(null,
+                        "No Existen Coincidencias con el Dato a BUSCAR",
+                        "My-App ", 2);
+                limpiarObjetos();
+            }
+        } catch (HeadlessException | SQLException exc) {
+           JOptionPane.showMessageDialog(null,
+                   "Error con la base de datos",
+                   "Error!!!", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception exc) {
+            JOptionPane.showMessageDialog(null,
+                   "Error en lectura de datos",
+                   "Error!!!", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_mnuConsultarActionPerformed
+
+    private void mnuEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuEliminarActionPerformed
+       
+        if (ftfNumeroTarjeta.getText().equals("")) {
+            JOptionPane.showMessageDialog(null,
+                    "Ingrese el número de tarjeta",
+                    "Error", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            try {
+                String query = "DELETE FROM contactos WHERE numeroTarjeta=?";
+                PreparedStatement ps = (PreparedStatement) conectar.prepareStatement(query);
+                ps.setString(1, ftfNumeroTarjeta.getText());
+                ps.executeUpdate();
+                JOptionPane.showMessageDialog(null,
+                        "Los Datos Del Contacto Fueron Eliminados",
+                        "My-App ", 3);
+                limpiarObjetos();
+                
+            } catch (Exception error) {
+                JOptionPane.showMessageDialog(null, "ERROR No Hay Conexion a la Base de Datos",
+                        "Error!!!!!", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_mnuEliminarActionPerformed
+    
+    private void limpiarObjetos() {
+        
+        txfNombreCliente.setText("");
+        dtcFechaVencimiento.setDate(null);
+        cbxLineaCredito.setSelectedIndex(0);
+        ftfNumeroTarjeta.setText("");
+        ftfCVV.setText("");
+        cbxBanco.setSelectedIndex(0);
+    }
+    
     /**
      * @param args the command line arguments
      */ 
@@ -358,6 +518,9 @@ public class FormTarjetaCredito extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
@@ -368,6 +531,10 @@ public class FormTarjetaCredito extends javax.swing.JFrame {
     private javax.swing.JSeparator jSeparator8;
     private javax.swing.JLabel lblEncabezado;
     private javax.swing.JLabel lblEncabezado1;
+    private javax.swing.JMenuItem mnuConsultar;
+    private javax.swing.JMenuItem mnuCrear;
+    private javax.swing.JMenuItem mnuEliminar;
+    private javax.swing.JMenuItem mnuModificar;
     private javax.swing.JPanel pnlMain;
     private javax.swing.JPanel pnlMain1;
     private javax.swing.JTextField txfNombreCliente;
